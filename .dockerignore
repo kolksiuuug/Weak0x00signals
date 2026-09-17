@@ -1,0 +1,20 @@
+# Контекст сборки python-сервисов — корень репозитория, поэтому чистим его агрессивно.
+.git
+.github
+.idea
+.vscode
+frontend/node_modules
+frontend/dist
+node_modules
+**/__pycache__
+**/*.py[cod]
+.venv
+venv
+.env
+.env.*
+!.env.example
+data/cache
+data/raw
+docs
+*.md
+!README.md

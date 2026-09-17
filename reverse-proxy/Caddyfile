@@ -1,0 +1,37 @@
+# Единственный публичный вход в систему. Наружу открыты только 80/443 этого контейнера.
+# Локально DOMAIN не задан → слушаем http://localhost без TLS.
+# На VPS в .env: DOMAIN=signals.example.ru → Caddy сам получит сертификат Let's Encrypt.
+
+{
+	email {$ACME_EMAIL:admin@example.com}
+	# Локальные тома для сертификатов смонтированы в docker-compose.yml
+}
+
+{$DOMAIN:http://localhost} {
+	encode zstd gzip
+
+	# API-оркестратор. Путь передаётся как есть: /api/search, /api/docs, /api/openapi.json.
+	handle /api/* {
+		reverse_proxy api:8000 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	# Всё остальное — статика React-приложения.
+	handle {
+		reverse_proxy frontend:80
+	}
+
+	# Базовые security-заголовки (ИБ — зона ответственности Участника 1)
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

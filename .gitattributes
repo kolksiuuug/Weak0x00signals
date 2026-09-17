@@ -1,0 +1,9 @@
+# Команда работает на Windows и Linux — фиксируем LF для всего, что попадает в Docker-образы.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.xlsx binary
+*.parquet binary
+*.joblib binary

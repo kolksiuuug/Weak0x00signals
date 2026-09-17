@@ -1,0 +1,123 @@
+name: weak-signals
+
+# Публично наружу смотрит ТОЛЬКО reverse-proxy (80/443).
+# api, ml, parser, postgres, redis, frontend портов на хост не публикуют —
+# общаются между собой по имени сервиса во внутренних docker-сетях.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-signals}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env}
+      POSTGRES_DB: ${POSTGRES_DB:-signals}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-signals} -d ${POSTGRES_DB:-signals}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [backend]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [backend]
+
+  ml:
+    build:
+      context: .                 # контекст = корень, чтобы в образ попал /shared
+      dockerfile: ml/Dockerfile
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signals}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-signals}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [backend]
+
+  parser:
+    build:
+      context: .
+      dockerfile: parser/Dockerfile
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LLM_MODEL: ${LLM_MODEL:-GigaChat 2 Lite}
+      GIGACHAT_API_KEY: ${GIGACHAT_API_KEY:-}
+      YANDEX_API_KEY: ${YANDEX_API_KEY:-}
+      YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signals}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-signals}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [backend]
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ML_URL: http://ml:8000
+      PARSER_URL: http://parser:8000
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signals}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-signals}
+      CONFIDENCE_THRESHOLD: ${CONFIDENCE_THRESHOLD:-0.75}
+    depends_on:
+      redis:
+        condition: service_healthy
+      ml:
+        condition: service_started
+      parser:
+        condition: service_started
+    networks: [backend, edge]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks: [edge]
+
+  reverse-proxy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-http://localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./reverse-proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - frontend
+    networks: [edge]
+
+networks:
+  backend:      # внутренняя шина: api ↔ ml ↔ parser ↔ postgres ↔ redis
+    driver: bridge
+  edge:         # периметр: reverse-proxy ↔ frontend ↔ api
+    driver: bridge
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
