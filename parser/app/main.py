@@ -1,6 +1,8 @@
-"""Сервис parser + LLM (Участник 3). Скелет: только моки, без сетевых вызовов наружу.
+"""Сервис parser + LLM (Участник 3). Реальный сбор источников через коннекторы.
 
-Наружу не публикуется — доступен только внутри docker-сети по имени `parser`.
+/collect: фан-аут коннекторов (arXiv, OpenAlex, GDELT, Патенты…) с таймаутами,
+ретраями и деградацией; нормализация в SignalDoc; дедуп по URL. LLM-подслой
+пока на моках — подключается следующим шагом в parser/app/llm.py.
 """
 
 from __future__ import annotations
@@ -10,7 +12,7 @@ import os
 
 from fastapi import FastAPI
 
-from parser.app import mock_data
+from parser.app import orchestrator
 from parser.app.llm import ALLOWED_MODELS, ModelNotAllowed, selected_model
 from shared.contracts import CollectRequest, CollectResponse, HealthResponse
 
@@ -22,8 +24,8 @@ logger = logging.getLogger("parser")
 
 app = FastAPI(
     title="Слабые сигналы — сервис сбора источников и LLM",
-    description="Коннекторы к открытым источникам + LLM-сервис. Сейчас работает в МОК-режиме.",
-    version="0.1.0",
+    description="Коннекторы к открытым источникам + LLM-сервис.",
+    version="0.2.0",
 )
 
 
@@ -38,6 +40,7 @@ def log_model_choice() -> None:
 
 @app.get("/health", response_model=HealthResponse, summary="Проверка живости сервиса")
 def health() -> HealthResponse:
+    # Сбор источников — реальный; LLM-слой пока на моках (см. /models).
     return HealthResponse(service="parser", mock=True)
 
 
@@ -53,19 +56,15 @@ def models() -> dict:
 
 
 @app.post("/collect", response_model=CollectResponse, summary="Собрать документы по запросу")
-def collect(req: CollectRequest) -> CollectResponse:
-    """МОК: возвращает нормализованные SignalDoc с полностью заполненными источниками.
-
-    Реальная реализация: arXiv API, Crossref/OpenAlex, GDELT, PatentsView, trafilatura;
-    ретраи, таймауты, деградация при падении отдельного источника, дедуп по URL.
-    """
-    docs = mock_data.build_documents(req.query, area=req.area, limit=req.limit)
-    processed = sum(len(d.sources) for d in docs)
-    logger.info("collect: запрос=%r, документов=%d, источников=%d", req.query, len(docs), processed)
-    return CollectResponse(query=req.query, sources_processed=processed, documents=docs)
+async def collect(req: CollectRequest) -> CollectResponse:
+    """Реальный сбор: коннекторы + нормализация + дедуп. Моки здесь не используются."""
+    resp = await orchestrator.collect(req.query, area=req.area, limit=req.limit)
+    logger.info("collect: запрос=%r, источников=%d, документов=%d",
+                req.query, resp.sources_processed, len(resp.documents))
+    return resp
 
 
-@app.get("/sources", summary="Все источники мок-корпуса")
-def sources() -> dict:
-    items = mock_data.all_sources()
+@app.get("/sources", summary="Последние реальные источники сбора (дедуп по URL)")
+async def sources(limit: int = 50) -> dict:
+    items = await orchestrator.all_sources_dedup(limit=limit)
     return {"total": len(items), "items": [s.model_dump(mode="json") for s in items]}
