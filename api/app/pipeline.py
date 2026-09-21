@@ -64,10 +64,14 @@ async def run_search(job_id: str, req: SearchRequest) -> None:
                 "is_weak_signal": item.is_weak_signal,
                 "rejected_reason": item.rejected_reason,
             })
-            (rejected if item.rejected_reason else accepted).append(enriched)
+            if item.rejected_reason or not item.is_weak_signal:
+                reason = item.rejected_reason or ("Отклонено: уверенность модели {:.0f}% ниже порога слабого сигнала.".format(item.score * 100))
+                rejected.append(enriched.model_copy(update={"is_weak_signal": False, "rejected_reason": reason}))
+            else:
+                accepted.append(enriched)
 
         # 3) ранжирование и ТОП-15
-        accepted.sort(key=lambda d: (d.score or 0.0), reverse=True)
+        accepted.sort(key=lambda d: ((d.score or 0.0) * 0.85 + (d.retrieval_score or 0.0) * 0.15, d.dataset_score or 0), reverse=True)
         top = accepted[: req.limit]
 
         try:
@@ -75,6 +79,17 @@ async def run_search(job_id: str, req: SearchRequest) -> None:
             llm_model = model_info.get("selected")
         except ServiceUnavailable:
             llm_model = None
+
+        # 4) RAG-enrichment только после ranking: описание/преимущество/кейс строятся из найденных источников.
+        insight_mode = None
+        if top:
+            try:
+                enriched = await clients.enrich(top, req.query)
+                top = enriched.documents
+                insight_mode = enriched.mode
+            except ServiceUnavailable as exc:
+                logger.warning("job=%s: enrichment недоступен: %s", job_id, exc)
+                insight_mode = "grounded-template"
 
         job.results = top
         job.rejected = rejected
@@ -84,6 +99,9 @@ async def run_search(job_id: str, req: SearchRequest) -> None:
             candidates_rejected=len(rejected),
             confident_signals=sum(1 for d in top if (d.score or 0) > settings.confidence_threshold),
             llm_model=llm_model,
+            ml_mode=(next(iter(scores.values())).model_mode if scores else None),
+            retrieval_mode=collected.retrieval_mode,
+            connector_status=collected.connector_status,
         )
         job.status = JobStatus.DONE
         logger.info(

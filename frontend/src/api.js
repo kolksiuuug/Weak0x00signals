@@ -5,7 +5,7 @@ const BASE = '/api'
 
 async function request(path, options) {
   const resp = await fetch(BASE + path, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     ...options,
   })
   if (!resp.ok) {

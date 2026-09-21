@@ -1,9 +1,5 @@
 name: weak-signals
 
-# Публично наружу смотрит ТОЛЬКО reverse-proxy (80/443).
-# api, ml, parser, postgres, redis, frontend портов на хост не публикуют —
-# общаются между собой по имени сервиса во внутренних docker-сетях.
-
 services:
   postgres:
     image: pgvector/pgvector:pg16
@@ -33,17 +29,43 @@ services:
       retries: 10
     networks: [backend]
 
+  ml-trainer:
+    build:
+      context: .
+      dockerfile: ml/Dockerfile
+    restart: "no"
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MODEL_PATH: /app/model/weak_signal.joblib
+      NEGATIVE_DATA_PATH: /app/data/negative_candidates.csv
+      OFFICIAL_DATASET_PATH: ${OFFICIAL_DATASET_PATH:-/app/data/official_dataset.xlsx}
+      ALLOW_SYNTHETIC_NEGATIVES: ${ALLOW_SYNTHETIC_NEGATIVES:-false}
+    volumes:
+      - ml_model:/app/model
+      - ./data:/app/data:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["python", "-m", "ml.app.train"]
+    networks: [backend]
+
   ml:
     build:
-      context: .                 # контекст = корень, чтобы в образ попал /shared
+      context: .
       dockerfile: ml/Dockerfile
     restart: unless-stopped
     environment:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MODEL_PATH: /app/model/weak_signal.joblib
+      WEAK_SIGNAL_THRESHOLD: ${WEAK_SIGNAL_THRESHOLD:-0.55}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signals}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-signals}
     depends_on:
+      ml-trainer:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
+    volumes:
+      - ml_model:/app/model
     networks: [backend]
 
   parser:
@@ -55,13 +77,22 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LLM_MODEL: ${LLM_MODEL:-GigaChat 2 Lite}
       GIGACHAT_API_KEY: ${GIGACHAT_API_KEY:-}
+      GIGACHAT_RQUID: ${GIGACHAT_RQUID:-}
+      GIGACHAT_VERIFY_SSL: ${GIGACHAT_VERIFY_SSL:-true}
       YANDEX_API_KEY: ${YANDEX_API_KEY:-}
       YANDEX_FOLDER_ID: ${YANDEX_FOLDER_ID:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      LLM_TIMEOUT: ${LLM_TIMEOUT:-45}
+      PATENTSVIEW_API_KEY: ${PATENTSVIEW_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      EMBEDDING_ALLOW_HASH_FALLBACK: ${EMBEDDING_ALLOW_HASH_FALLBACK:-true}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-signals}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-signals}
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - hf_cache:/home/appuser/.cache/huggingface
     networks: [backend]
 
   api:
@@ -80,9 +111,9 @@ services:
       redis:
         condition: service_healthy
       ml:
-        condition: service_started
+        condition: service_healthy
       parser:
-        condition: service_started
+        condition: service_healthy
     networks: [backend, edge]
 
   frontend:
@@ -112,12 +143,14 @@ services:
     networks: [edge]
 
 networks:
-  backend:      # внутренняя шина: api ↔ ml ↔ parser ↔ postgres ↔ redis
+  backend:
     driver: bridge
-  edge:         # периметр: reverse-proxy ↔ frontend ↔ api
+  edge:
     driver: bridge
 
 volumes:
   postgres_data:
+  ml_model:
+  hf_cache:
   caddy_data:
   caddy_config:

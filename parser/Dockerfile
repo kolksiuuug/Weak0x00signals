@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r /app/parser/requirements.txt
 
 COPY shared/ /app/shared/
 COPY parser/ /app/parser/
+COPY data/ /app/data/
 
 RUN useradd --create-home --uid 10003 appuser && chown -R appuser:appuser /app
 USER appuser

@@ -33,8 +33,8 @@ logger = logging.getLogger("api")
 app = FastAPI(
     title="Слабые сигналы — API",
     description=(
-        "Оркестратор: свободный запрос → сбор источников → trust-слой → скоринг → ТОП-15 гипотез. "
-        "Скелет работает на МОК-данных: реальные коннекторы и модель подключаются участниками 2 и 3."
+        "Свободный запрос → live-поиск → trust-слой → интерпретируемый скоринг → maturity/hype-фильтр → "
+        "RAG-карточки ТОП-15 с источниками."
     ),
     version=settings.version,
     docs_url="/api/docs",
@@ -45,7 +45,7 @@ app = FastAPI(
 
 @app.get("/health", response_model=HealthResponse, tags=["служебные"], summary="Проверка живости")
 async def health() -> HealthResponse:
-    return HealthResponse(service=settings.service_name, version=settings.version, mock=True)
+    return HealthResponse(service=settings.service_name, version=settings.version, mock=False, details={"mode": "production-pipeline"})
 
 
 @app.get("/api/health/deep", tags=["служебные"], summary="Проверка всех зависимостей")
@@ -96,14 +96,12 @@ async def search_result(job_id: str) -> SearchResult:
     summary="Карточка-инсайт по одному сигналу",
 )
 async def signal_card(signal_id: str) -> SignalDoc:
-    """МОК-карточка: тянем документ у parser, прогоняем через trust-слой и ml."""
+    """Карточка сохранённого сигнала: trust → ML → grounded RAG."""
     try:
-        collected = await clients.collect("карточка сигнала {}".format(signal_id), limit=100)
+        doc = await clients.get_document(signal_id)
     except ServiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-
-    doc = next((d for d in collected.documents if d.id == signal_id), None)
-    if doc is None:
+    except Exception:
         raise HTTPException(status_code=404, detail="Сигнал с идентификатором «{}» не найден.".format(signal_id))
 
     doc, reason = check_document(doc)
@@ -117,12 +115,22 @@ async def signal_card(signal_id: str) -> SignalDoc:
     if not scored:
         return doc
     item = scored[0]
-    return doc.model_copy(update={
+    enriched = doc.model_copy(update={
         "score": item.score,
         "why": item.why,
         "is_weak_signal": item.is_weak_signal,
         "rejected_reason": item.rejected_reason,
+        "dataset_score": item.dataset_score,
+        "model_version": item.model_version,
+        "model_mode": item.model_mode,
     })
+    try:
+        insight = await clients.enrich([enriched], "карточка сигнала")
+        if insight.documents:
+            enriched = insight.documents[0]
+    except ServiceUnavailable:
+        pass
+    return enriched
 
 
 @app.get(
@@ -136,14 +144,9 @@ async def sources(
 ) -> SourcesResponse:
     """Список источников после дедупа и пересчёта доверенности trust-слоем."""
     try:
-        collected = await clients.collect("проверка источников", limit=100)
+        flat = await clients.parser_sources(limit)
     except ServiceUnavailable as exc:
         raise HTTPException(status_code=503, detail=str(exc))
-
-    flat = []
-    for doc in collected.documents:
-        doc, _ = check_document(doc)
-        flat.extend(doc.sources)
-
+    flat = [check_document(SignalDoc(id="source-check", title="source-check", raw_text="ok", sources=[src]))[0].sources[0] for src in flat if src]
     flat = dedup_sources(flat)
     return SourcesResponse(total=len(flat), items=flat[:limit])
