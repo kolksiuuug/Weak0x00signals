@@ -1,0 +1,45 @@
+@startuml
+' Схема архитектуры фундамента. Дополняется по мере подключения реальных модулей.
+skinparam defaultFontName Arial
+skinparam componentStyle rectangle
+title Слабые сигналы — архитектура развёртывания
+
+actor "Пользователь" as user
+cloud "Открытые источники\narXiv, OpenAlex, GDELT, PatentsView" as ext
+
+node "VPS (Docker / Portainer)" {
+  component "reverse-proxy\nCaddy :80/:443" as caddy
+
+  package "сеть edge" {
+    component "frontend\nnginx + React" as fe
+    component "api\nFastAPI-оркестратор\ntrust-слой, ИБ" as api
+  }
+
+  package "сеть backend" {
+    component "parser + LLM\nFastAPI" as parser
+    component "ml\nFastAPI + scikit-learn" as ml
+    database "PostgreSQL\n+ pgvector" as pg
+    database "Redis\nстатусы задач" as redis
+  }
+}
+
+user --> caddy : HTTPS
+caddy --> fe : /
+caddy --> api : /api/*
+api --> redis : job_id + polling
+api --> parser : POST /collect
+api --> ml : POST /score/batch
+parser --> ext : официальные API
+parser --> pg
+ml --> pg
+
+note right of api
+  Наружу опубликован только reverse-proxy.
+  Остальные сервисы — во внутренних сетях.
+end note
+
+note bottom of ml
+  Модель этапа 1 интерпретируемая:
+  балл = стадия (1..4) + тренд (1..3)
+end note
+@enduml

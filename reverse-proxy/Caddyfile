@@ -1,0 +1,30 @@
+# Caddy здесь НЕ занимает 80/443 и НЕ получает Let's Encrypt.
+# HTTPS и сертификатами на VPS занимается уже существующий Nginx Proxy Manager.
+# Поэтому приложение безопасно соседствует с существующими сервисами.
+
+:8080 {
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy api:8000 {
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-Proto http
+        }
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

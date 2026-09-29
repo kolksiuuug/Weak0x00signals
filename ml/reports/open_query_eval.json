@@ -1,0 +1,148 @@
+{
+  "generated_at": "2026-09-28T19:22:25+00:00",
+  "mode": "offline",
+  "limit": 15,
+  "areas": [
+    {
+      "area": "Edge",
+      "candidates": 23,
+      "expected_weak": 16,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.9375,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 7,
+      "rejected_rules": {
+        "mature_technology": 3,
+        "formed_market": 4
+      },
+      "missed": [
+        "Агентные (multi-step) AI-workflow, исполняемые локально на NPU ПК"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.808,
+      "order_matched": 15
+    },
+    {
+      "area": "Защита ИИ",
+      "candidates": 22,
+      "expected_weak": 16,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.9375,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 6,
+      "rejected_rules": {
+        "mature_technology": 4,
+        "formed_market": 2
+      },
+      "missed": [
+        "Криптографическая верификация трафика агентов (Web Bot Auth, signed agents)"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.7298,
+      "order_matched": 15
+    },
+    {
+      "area": "Индустриальный ИИ",
+      "candidates": 23,
+      "expected_weak": 17,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.8824,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 6,
+      "rejected_rules": {
+        "formed_market": 2,
+        "mature_technology": 3,
+        "hype": 1
+      },
+      "missed": [
+        "Нейроморфные/событийные edge-чипы для непрерывного мониторинга промышленного оборудования (мВт-класс, без облака)",
+        "Самообучающиеся контуры управления: RL прямо на промышленном контроллере/в живом цеху (а не в симуляторе)"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.75,
+      "order_matched": 15
+    },
+    {
+      "area": "Инфраструктура ИИ",
+      "candidates": 31,
+      "expected_weak": 17,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.8824,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 15,
+      "rejected_rules": {
+        "hype": 2,
+        "mature_technology": 9,
+        "other": 4
+      },
+      "missed": [
+        "3D-стековая память-вычислитель как альтернатива HBM (3DIMC, стековый DRAM)",
+        "Сверхпроводящие / криогенные вычисления для ИИ-ЦОД"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.5234,
+      "order_matched": 15
+    },
+    {
+      "area": "Роботы",
+      "candidates": 21,
+      "expected_weak": 17,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.8824,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 3,
+      "rejected_rules": {
+        "mature_technology": 3
+      },
+      "missed": [
+        "Медицинские микророботы, доходящие до клиники",
+        "Электрогидравлические искусственные мышцы (HASEL) вместо редукторных приводов"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.929,
+      "order_matched": 15
+    },
+    {
+      "area": "Финтех",
+      "candidates": 25,
+      "expected_weak": 17,
+      "returned": 15,
+      "hits": 15,
+      "recall": 0.8824,
+      "precision": 1.0,
+      "negatives_in_top": 0,
+      "rejected": 9,
+      "rejected_rules": {
+        "crowded_market": 1,
+        "mature_technology": 2,
+        "formed_market": 3,
+        "hype": 3
+      },
+      "missed": [
+        "Голосовые ИИ-агенты для взыскания и обслуживания долга на развивающихся рынках",
+        "Постквантовая криптография в финансовой инфраструктуре (приоритизация миграции)"
+      ],
+      "leaked_titles": [],
+      "order_rho": -0.2844,
+      "order_matched": 15
+    }
+  ],
+  "totals": {
+    "hits": 90,
+    "expected": 100,
+    "returned": 90,
+    "recall": 0.9,
+    "precision": 1.0,
+    "order_rho": -0.6708
+  }
+}

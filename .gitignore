@@ -1,0 +1,47 @@
+# --- секреты (CLAUDE.md §5) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- данные и артефакты моделей ---
+data/cache/
+data/raw/
+*.joblib
+*.pkl
+*.parquet
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- данные: сырой закрытый датасет и производные (CLAUDE.md §5) ---
+data/raw/
+data/processed/
+ml/artifacts/*
+!ml/artifacts/.gitkeep

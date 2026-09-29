@@ -1,0 +1,587 @@
+{
+  "trained_at": "2026-09-28T19:55:59+00:00",
+  "model_kind": "logistic_regression",
+  "threshold": 0.2,
+  "min_precision": 0.8,
+  "seed": 42,
+  "n_train": 108,
+  "n_holdout": 37,
+  "n_positive": 100,
+  "n_negative": 45,
+  "negative_sources": {
+    "mature_control.csv": 45
+  },
+  "features": [
+    "stage",
+    "trend",
+    "n_companies_log",
+    "few_players",
+    "n_sources_log",
+    "sparse_pubs",
+    "n_high_trust_log",
+    "n_low_trust_log",
+    "share_high_trust",
+    "share_low_trust",
+    "has_scientific",
+    "has_patent",
+    "share_news",
+    "weakness_markers",
+    "maturity_markers",
+    "hype_markers",
+    "early_language_density",
+    "maturity_language_density",
+    "hype_language_density",
+    "technical_context_density",
+    "experimental_context_density"
+  ],
+  "candidate_scores": {
+    "logistic_regression": 0.9727928150620031,
+    "gradient_boosting": 0.9792444279652288
+  },
+  "insight": {
+    "rows_with_points": 100,
+    "match_rate": 0.96,
+    "mismatches": [
+      {
+        "technology": "Нейроморфные (brain-inspired) чипы для ИИ-нагрузок",
+        "stage_raw": "Прототип/PoC (у edge-игроков — раннее внедрение)",
+        "trend_raw": "Растёт быстро — мегараунд seed-стадии + серия европейских/азиатских раундов 2026 г. при почти нулевой базе упоминаний 2024 г.",
+        "stage": 2,
+        "trend": 3,
+        "points_expected": 5,
+        "points_actual": 7
+      },
+      {
+        "technology": "Федеративное обучение для межбанковского AML/антифрода (без обмена сырыми данными)",
+        "stage_raw": "Пилот (эксперименты Swift) / раннее внедрение (Consilient)",
+        "trend_raw": "Растёт — от пилотов 2024 к экспериментам 2025 и работам 2026; в массовой финтех-прессе почти не обсуждается",
+        "stage": 3,
+        "trend": 2,
+        "points_expected": 5,
+        "points_actual": 6
+      },
+      {
+        "technology": "Браузерно-нативные автономные ИИ-агенты комплаенса (KYC/AML «агентная рабочая сила»)",
+        "stage_raw": "Прототип/PoC → ранние внедрения (банки, финтехи как клиенты Sphinx)",
+        "trend_raw": "Растёт быстро — минимум три seed-раунда за первый квартал 2026 в очень узкой нише financial crime compliance",
+        "stage": 4,
+        "trend": 3,
+        "points_expected": 7,
+        "points_actual": 5
+      },
+      {
+        "technology": "Депозитные токены банков на публичных блокчейнах",
+        "stage_raw": "Ранние внедрения (ограниченный институциональный доступ)",
+        "trend_raw": "Растёт — от анонса Canton (январь 2026) к развёртыванию на Base (март 2026); упоминаний мало относительно стейблкоинов",
+        "stage": 4,
+        "trend": 2,
+        "points_expected": 6,
+        "points_actual": 4
+      }
+    ]
+  },
+  "metrics": {
+    "holdout": {
+      "threshold": 0.2,
+      "n": 37,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": {
+        "true_negative": 11,
+        "false_positive": 0,
+        "false_negative": 0,
+        "true_positive": 26
+      },
+      "roc_auc": 1.0,
+      "average_precision": 0.9999999999999999
+    },
+    "cross_validation": {
+      "threshold": 0.2,
+      "n": 145,
+      "precision": 0.9801980198019802,
+      "recall": 0.99,
+      "f1": 0.9850746268656716,
+      "accuracy": 0.9793103448275862,
+      "confusion_matrix": {
+        "true_negative": 43,
+        "false_positive": 2,
+        "false_negative": 1,
+        "true_positive": 99
+      },
+      "roc_auc": 0.994,
+      "average_precision": 0.9970677663904729
+    },
+    "threshold_oof": {
+      "threshold": 0.2,
+      "precision": 0.9733333333333334,
+      "recall": 0.9864864864864865,
+      "f1": 0.9798657718120806
+    }
+  },
+  "feature_importance": {
+    "coefficients": [
+      {
+        "feature": "maturity_markers",
+        "label": "текстовые маркеры зрелости технологии",
+        "coef": -2.3906434424883405
+      },
+      {
+        "feature": "hype_markers",
+        "label": "текстовые маркеры маркетингового хайпа",
+        "coef": -2.0047629098272766
+      },
+      {
+        "feature": "weakness_markers",
+        "label": "текстовые маркеры ранней стадии",
+        "coef": 1.0977546558106837
+      },
+      {
+        "feature": "early_language_density",
+        "label": "плотность терминов ранней стадии в тексте",
+        "coef": 0.9711747999763213
+      },
+      {
+        "feature": "trend",
+        "label": "тренд упоминаний (1 — стабильно … 3 — растёт быстро)",
+        "coef": 0.8712610801188954
+      },
+      {
+        "feature": "maturity_language_density",
+        "label": "плотность терминов зрелой технологии в тексте",
+        "coef": -0.778568854247457
+      },
+      {
+        "feature": "experimental_context_density",
+        "label": "плотность экспериментального и исследовательского контекста",
+        "coef": 0.6696825254687476
+      },
+      {
+        "feature": "stage",
+        "label": "стадия развития (1 — концепция … 4 — раннее внедрение)",
+        "coef": 0.5764907436507127
+      },
+      {
+        "feature": "n_companies_log",
+        "label": "число компаний-участников",
+        "coef": 0.34875654301636416
+      },
+      {
+        "feature": "technical_context_density",
+        "label": "плотность технического контекста",
+        "coef": 0.3429905142190815
+      },
+      {
+        "feature": "hype_language_density",
+        "label": "плотность терминов хайпа в тексте",
+        "coef": -0.31578142890076216
+      },
+      {
+        "feature": "share_low_trust",
+        "label": "доля источников пониженной доверенности (соцсети, блоги, пресс-релизы)",
+        "coef": 0.29896466881908246
+      },
+      {
+        "feature": "n_low_trust_log",
+        "label": "число источников пониженной доверенности",
+        "coef": 0.29896466881908207
+      },
+      {
+        "feature": "few_players",
+        "label": "концентрация игроков: не более 2 компаний",
+        "coef": -0.26411641380415557
+      },
+      {
+        "feature": "has_scientific",
+        "label": "есть научная публикация",
+        "coef": 0.1356710666516302
+      },
+      {
+        "feature": "n_sources_log",
+        "label": "число найденных источников",
+        "coef": 0.04906663680458011
+      },
+      {
+        "feature": "share_high_trust",
+        "label": "доля источников высокой доверенности",
+        "coef": -0.017179015434802672
+      },
+      {
+        "feature": "share_news",
+        "label": "доля новостных источников",
+        "coef": 0.016071820044843886
+      },
+      {
+        "feature": "n_high_trust_log",
+        "label": "число источников высокой доверенности",
+        "coef": -0.010358298698360826
+      },
+      {
+        "feature": "sparse_pubs",
+        "label": "разреженность публикаций: не более 3 источников",
+        "coef": 0.0
+      },
+      {
+        "feature": "has_patent",
+        "label": "есть патент",
+        "coef": 0.0
+      }
+    ],
+    "intercept": 2.312343546876854,
+    "permutation": [
+      {
+        "feature": "hype_markers",
+        "label": "текстовые маркеры маркетингового хайпа",
+        "importance_mean": 0.07256010096346227,
+        "importance_std": 0.024636763492379702
+      },
+      {
+        "feature": "maturity_markers",
+        "label": "текстовые маркеры зрелости технологии",
+        "importance_mean": 0.03244748852613125,
+        "importance_std": 0.03080617885328064
+      },
+      {
+        "feature": "stage",
+        "label": "стадия развития (1 — концепция … 4 — раннее внедрение)",
+        "importance_mean": 0.01636054421768703,
+        "importance_std": 0.013243178824104418
+      },
+      {
+        "feature": "technical_context_density",
+        "label": "плотность технического контекста",
+        "importance_mean": 0.0071303187941843095,
+        "importance_std": 0.012532869244501489
+      },
+      {
+        "feature": "hype_language_density",
+        "label": "плотность терминов хайпа в тексте",
+        "importance_mean": 0.0028299319727891053,
+        "importance_std": 0.007214939175695886
+      },
+      {
+        "feature": "weakness_markers",
+        "label": "текстовые маркеры ранней стадии",
+        "importance_mean": 0.0021288515406162243,
+        "importance_std": 0.01854209473636364
+      },
+      {
+        "feature": "n_sources_log",
+        "label": "число найденных источников",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "sparse_pubs",
+        "label": "разреженность публикаций: не более 3 источников",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "n_high_trust_log",
+        "label": "число источников высокой доверенности",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "share_high_trust",
+        "label": "доля источников высокой доверенности",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "has_patent",
+        "label": "есть патент",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "share_news",
+        "label": "доля новостных источников",
+        "importance_mean": 0.0,
+        "importance_std": 0.0
+      },
+      {
+        "feature": "n_low_trust_log",
+        "label": "число источников пониженной доверенности",
+        "importance_mean": -0.002039215686274509,
+        "importance_std": 0.006117647058823527
+      },
+      {
+        "feature": "share_low_trust",
+        "label": "доля источников пониженной доверенности (соцсети, блоги, пресс-релизы)",
+        "importance_mean": -0.002039215686274509,
+        "importance_std": 0.006117647058823527
+      },
+      {
+        "feature": "has_scientific",
+        "label": "есть научная публикация",
+        "importance_mean": -0.004078431372549018,
+        "importance_std": 0.008156862745098036
+      },
+      {
+        "feature": "trend",
+        "label": "тренд упоминаний (1 — стабильно … 3 — растёт быстро)",
+        "importance_mean": -0.007395491529945316,
+        "importance_std": 0.013459073472038747
+      },
+      {
+        "feature": "n_companies_log",
+        "label": "число компаний-участников",
+        "importance_mean": -0.00810137388288649,
+        "importance_std": 0.01258802477448553
+      },
+      {
+        "feature": "few_players",
+        "label": "концентрация игроков: не более 2 компаний",
+        "importance_mean": -0.01144284380418834,
+        "importance_std": 0.014963174513183256
+      },
+      {
+        "feature": "experimental_context_density",
+        "label": "плотность экспериментального и исследовательского контекста",
+        "importance_mean": -0.018248366013071896,
+        "importance_std": 0.011987320112477351
+      },
+      {
+        "feature": "early_language_density",
+        "label": "плотность терминов ранней стадии в тексте",
+        "importance_mean": -0.021568627450980395,
+        "importance_std": 0.012555145563593833
+      },
+      {
+        "feature": "maturity_language_density",
+        "label": "плотность терминов зрелой технологии в тексте",
+        "importance_mean": -0.021568627450980395,
+        "importance_std": 0.012555145563593832
+      }
+    ]
+  },
+  "class_profile": {
+    "features": [
+      {
+        "feature": "trend",
+        "label": "тренд упоминаний (1 — стабильно … 3 — растёт быстро)",
+        "mean_positive": 2.35,
+        "mean_negative": 1.2222222222222223,
+        "std_positive": 0.4974937185533099,
+        "std_negative": 0.5533288710217215,
+        "single_feature_auc": 0.9122222222222223
+      },
+      {
+        "feature": "maturity_markers",
+        "label": "текстовые маркеры зрелости технологии",
+        "mean_positive": 0.02754285382011566,
+        "mean_negative": 0.508551964809148,
+        "std_positive": 0.10039252823629867,
+        "std_negative": 0.2983267527667474,
+        "single_feature_auc": 0.8852222222222222
+      },
+      {
+        "feature": "maturity_language_density",
+        "label": "плотность терминов зрелой технологии в тексте",
+        "mean_positive": 0.3229243332799819,
+        "mean_negative": 0.8577545055163439,
+        "std_positive": 0.30351979106540966,
+        "std_negative": 0.34157539485310257,
+        "single_feature_auc": 0.8817777777777778
+      },
+      {
+        "feature": "early_language_density",
+        "label": "плотность терминов ранней стадии в тексте",
+        "mean_positive": 0.66367133266126,
+        "mean_negative": 0.1341058779794944,
+        "std_positive": 0.34642036917851926,
+        "std_negative": 0.2514562015127365,
+        "single_feature_auc": 0.8522222222222221
+      },
+      {
+        "feature": "experimental_context_density",
+        "label": "плотность экспериментального и исследовательского контекста",
+        "mean_positive": 0.6339584313388227,
+        "mean_negative": 0.1341058779794944,
+        "std_positive": 0.35020595132670795,
+        "std_negative": 0.2514562015127365,
+        "single_feature_auc": 0.835
+      },
+      {
+        "feature": "weakness_markers",
+        "label": "текстовые маркеры ранней стадии",
+        "mean_positive": 0.2204991035905708,
+        "mean_negative": 0.0,
+        "std_positive": 0.23707369982641324,
+        "std_negative": 0.0,
+        "single_feature_auc": 0.745
+      },
+      {
+        "feature": "stage",
+        "label": "стадия развития (1 — концепция … 4 — раннее внедрение)",
+        "mean_positive": 2.88,
+        "mean_negative": 3.6222222222222222,
+        "std_positive": 0.9927738916792685,
+        "std_negative": 0.8243216440440626,
+        "single_feature_auc": 0.7137777777777778
+      },
+      {
+        "feature": "hype_markers",
+        "label": "текстовые маркеры маркетингового хайпа",
+        "mean_positive": 0.00786938680574733,
+        "mean_negative": 0.1277778047485559,
+        "std_positive": 0.05508570764023132,
+        "std_negative": 0.24633838453484602,
+        "single_feature_auc": 0.6026666666666667
+      },
+      {
+        "feature": "hype_language_density",
+        "label": "плотность терминов хайпа в тексте",
+        "mean_positive": 0.008563592013036731,
+        "mean_negative": 0.15665161427587654,
+        "std_positive": 0.05998352929824773,
+        "std_negative": 0.32521731534762766,
+        "single_feature_auc": 0.592
+      },
+      {
+        "feature": "n_companies_log",
+        "label": "число компаний-участников",
+        "mean_positive": 1.5502657994905455,
+        "mean_negative": 1.491360251908745,
+        "std_positive": 0.22746426395713878,
+        "std_negative": 0.17894095775766733,
+        "single_feature_auc": 0.5780000000000001
+      },
+      {
+        "feature": "n_low_trust_log",
+        "label": "число источников пониженной доверенности",
+        "mean_positive": 0.06931471805599453,
+        "mean_negative": 0.0,
+        "std_positive": 0.2079441541679836,
+        "std_negative": 0.0,
+        "single_feature_auc": 0.55
+      },
+      {
+        "feature": "share_low_trust",
+        "label": "доля источников пониженной доверенности (соцсети, блоги, пресс-релизы)",
+        "mean_positive": 0.03333333333333333,
+        "mean_negative": 0.0,
+        "std_positive": 0.09999999999999998,
+        "std_negative": 0.0,
+        "single_feature_auc": 0.55
+      },
+      {
+        "feature": "has_scientific",
+        "label": "есть научная публикация",
+        "mean_positive": 0.21,
+        "mean_negative": 0.13333333333333333,
+        "std_positive": 0.4073082370883261,
+        "std_negative": 0.33993463423951903,
+        "single_feature_auc": 0.5383333333333333
+      },
+      {
+        "feature": "few_players",
+        "label": "концентрация игроков: не более 2 компаний",
+        "mean_positive": 0.06,
+        "mean_negative": 0.1111111111111111,
+        "std_positive": 0.23748684174075832,
+        "std_negative": 0.3142696805273545,
+        "single_feature_auc": 0.5255555555555556
+      },
+      {
+        "feature": "technical_context_density",
+        "label": "плотность технического контекста",
+        "mean_positive": 0.2821258578813924,
+        "mean_negative": 0.24352921892532153,
+        "std_positive": 0.3260387914646234,
+        "std_negative": 0.33630418849054367,
+        "single_feature_auc": 0.5221111111111111
+      },
+      {
+        "feature": "share_high_trust",
+        "label": "доля источников высокой доверенности",
+        "mean_positive": 0.12,
+        "mean_negative": 0.1259259259259259,
+        "std_positive": 0.24276188608044164,
+        "std_negative": 0.22265390170650573,
+        "single_feature_auc": 0.5204444444444445
+      },
+      {
+        "feature": "n_high_trust_log",
+        "label": "число источников высокой доверенности",
+        "mean_positive": 0.20572400378863942,
+        "mean_negative": 0.21826319029990257,
+        "std_positive": 0.3814703445546412,
+        "std_negative": 0.3513508586372273,
+        "single_feature_auc": 0.5165555555555555
+      },
+      {
+        "feature": "n_sources_log",
+        "label": "число найденных источников",
+        "mean_positive": 1.3419642198955597,
+        "mean_negative": 1.332533480780543,
+        "std_positive": 0.11661172944233618,
+        "std_negative": 0.13719073594495598,
+        "single_feature_auc": 0.5085555555555555
+      },
+      {
+        "feature": "share_news",
+        "label": "доля новостных источников",
+        "mean_positive": 0.8433333333333334,
+        "mean_negative": 0.8518518518518519,
+        "std_positive": 0.2558428336998235,
+        "std_negative": 0.23628352455906046,
+        "single_feature_auc": 0.5005555555555555
+      },
+      {
+        "feature": "sparse_pubs",
+        "label": "разреженность публикаций: не более 3 источников",
+        "mean_positive": 1.0,
+        "mean_negative": 1.0,
+        "std_positive": 0.0,
+        "std_negative": 0.0,
+        "single_feature_auc": 0.5
+      },
+      {
+        "feature": "has_patent",
+        "label": "есть патент",
+        "mean_positive": 0.0,
+        "mean_negative": 0.0,
+        "std_positive": 0.0,
+        "std_negative": 0.0,
+        "single_feature_auc": 0.5
+      }
+    ],
+    "suspicious": [],
+    "auc_threshold": 0.95
+  },
+  "ablation": {
+    "features_removed": [
+      "weakness_markers",
+      "maturity_markers",
+      "hype_markers"
+    ],
+    "f1_full": 0.9900990099009901,
+    "f1_without_lexicon": 0.9658536585365853,
+    "f1_drop": 0.0242,
+    "precision_without_lexicon": 0.9428571428571428,
+    "recall_without_lexicon": 0.99
+  },
+  "maturity_filter": {
+    "positives_total": 100,
+    "positives_rejected_by_filter": 1,
+    "positives_rejection_rate": 0.01,
+    "positives_rules": {
+      "crowded_market": 1
+    },
+    "positives_examples": [
+      "Голосовые ИИ-агенты для взыскания и обслуживания долга на развивающихся рынках -> crowded_market"
+    ],
+    "negatives_total": 45,
+    "negatives_caught_by_filter": 41,
+    "negatives_catch_rate": 0.9111,
+    "negatives_rules": {
+      "mature_technology": 26,
+      "formed_market": 10,
+      "hype": 5
+    }
+  }
+}

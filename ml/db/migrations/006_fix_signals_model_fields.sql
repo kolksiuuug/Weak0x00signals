@@ -1,0 +1,3 @@
+ALTER TABLE signals
+    ADD COLUMN IF NOT EXISTS model_version TEXT,
+    ADD COLUMN IF NOT EXISTS model_mode TEXT;
