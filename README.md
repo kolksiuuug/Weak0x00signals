@@ -93,7 +93,7 @@ docker compose ps
 Проверьте состояние приложения:
 
 ```bash
-curl http://localhost/api/health/deep
+curl http://localhost:18080/api/health/deep
 ```
 
 При успешном запуске API должен вернуть информацию о состоянии основных компонентов системы.
@@ -103,13 +103,13 @@ curl http://localhost/api/health/deep
 Откройте в браузере:
 
 ```text
-http://localhost
+http://localhost:18080
 ```
 
 Документация API Swagger:
 
 ```text
-http://localhost/api/docs
+http://localhost:18080/api/docs
 ```
 
 ### 6. Остановка проекта
@@ -320,13 +320,13 @@ cd ..
 docker compose down -v
 docker compose up -d --build
 docker compose ps
-curl http://localhost/api/health/deep
+curl http://localhost:18080/api/health/deep
 ```
 
 После запуска откройте интерфейс:
 
 ```text
-http://localhost
+http://localhost:18080
 ```
 
 и выполните несколько различных открытых поисковых запросов.
